@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import couponsRoutes from "./routes/coupons.routes.js";
+import paymentRoutes from "./routes/payment.route.js"
 
 import { connectDB } from "./lib/connectDB.js";
 
@@ -23,6 +24,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/coupons", couponsRoutes);
+app.use("/api/payments", paymentRoutes);
 
 
 app.listen(PORT, () => {
