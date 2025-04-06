@@ -1,21 +1,23 @@
-import {useState} from "react"
-import {motion} from "framer-motion"
+import { useState } from "react"
+import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
-import { LogIn,Mail,Lock,ArrowRight,Loader } from "lucide-react"
+import { LogIn, Mail, Lock, ArrowRight, Loader } from "lucide-react"
+import { userStore } from "../store/useUserStore"
 
 function LoginPage() {
 
-  const [email,setEmail] = useState("")
-  const [password,setPassword] = useState("")
-  const [loading ,setLoading] = useState(false)
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log(email,password)
-  }
+    const { login, loading } = userStore()
 
-  return (
-    <div className='flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
+    const handleSubmit = async(e) => {
+        e.preventDefault()
+        await login({ email, password })
+    }
+
+    return (
+        <div className='flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
             <motion.div className='sm:mx-auto sm:w-full sm:max-w-md' initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
                 <h2 className='mt-6 text-center text-3xl font-extrabold text-emerald-400'>Login into account</h2>
             </motion.div>
@@ -36,7 +38,7 @@ function LoginPage() {
                                     type='email'
                                     required
                                     value={email}
-                                    onChange={(e) => setFormData(e.target.value)}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     className=' block w-full px-3 py-2 pl-10 bg-gray-700 border border-gray-600 
 									rounded-md shadow-sm
 									 placeholder-gray-400 focus:outline-none focus:ring-emerald-500 
@@ -59,7 +61,7 @@ function LoginPage() {
                                     type='password'
                                     required
                                     value={password}
-                                    onChange={(e) => setFormData(e.target.value )}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     className=' block w-full px-3 py-2 pl-10 bg-gray-700 border border-gray-600 
 									rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm'
                                     placeholder='••••••••'
@@ -67,7 +69,7 @@ function LoginPage() {
                             </div>
                         </div>
 
-                        
+
 
                         <button
                             type='submit'
@@ -85,7 +87,7 @@ function LoginPage() {
                             ) : (
                                 <>
                                     <LogIn className='mr-2 h-5 w-5' aria-hidden='true' />
-                                    Login 
+                                    Login
                                 </>
                             )}
                         </button>
@@ -100,7 +102,7 @@ function LoginPage() {
                 </div>
             </motion.div>
         </div>
-  )
+    )
 }
 
 export default LoginPage

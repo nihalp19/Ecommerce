@@ -130,3 +130,5 @@ async function createNewCoupon(userId) {
 
     return newCoupon
 }
+
+

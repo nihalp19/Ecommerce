@@ -15,7 +15,7 @@ const generateTokens = (userId) => {
 };
 
 const storeRefreshToken = async (userId, refreshToken) => {
-	await redis.set(`refresh_token:${userId}`, refreshToken, {"ex": 7 * 24 * 60 * 60}); // 7days
+	await redis.set(`refresh_token:${userId}`, refreshToken, { "ex": 7 * 24 * 60 * 60 }); // 7days
 };
 
 const setCookies = (res, accessToken, refreshToken) => {
@@ -49,11 +49,14 @@ export const signup = async (req, res) => {
 
 		setCookies(res, accessToken, refreshToken);
 
-		res.status(201).json({
-			_id: user._id,
-			name: user.name,
-			email: user.email,
-			role: user.role,
+		return res.status(201).json({
+			message: "user is signup successfully",
+			user: {
+				_id: user._id,
+				name: user.name,
+				email: user.email,
+				role: user.role,
+			}
 		});
 	} catch (error) {
 		console.log("Error in signup controller", error.message);
@@ -71,11 +74,13 @@ export const login = async (req, res) => {
 			await storeRefreshToken(user._id, refreshToken);
 			setCookies(res, accessToken, refreshToken);
 
-			res.json({
-				_id: user._id,
-				name: user.name,
-				email: user.email,
-				role: user.role,
+			res.status(200).json({
+				message: "user is login successfull", user: {
+					_id: user._id,
+					name: user.name,
+					email: user.email,
+					role: user.role,
+				}
 			});
 		} else {
 			res.status(400).json({ message: "Invalid email or password" });
@@ -135,10 +140,10 @@ export const refreshToken = async (req, res) => {
 	}
 };
 
-// export const getProfile = async (req, res) => {
-// 	try {
-// 		res.json(req.user);
-// 	} catch (error) {
-// 		res.status(500).json({ message: "Server error", error: error.message });
-// 	}
-// };
+export const getProfile = async (req, res) => {
+	try {
+		res.status(200).json({user : req.user});
+	} catch (error) {
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
+};
