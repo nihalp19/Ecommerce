@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { BarChart,PlusCircle,ShoppingBasket } from 'lucide-react'
-import { userStore } from '../store/useUserStore'
 import {motion} from "framer-motion"
 import AnalyticsTab from '../components/AnalyticsTab'
 import ProductsTab from '../components/ProductsTab'
 import CreateProductForm from '../components/CreateProductForm'
+import { useState } from 'react'
+import { useProductStore } from '../store/userProductStore'
 
 const tabs = [
     {id : "create",label : "Create Product", icon : PlusCircle},
@@ -13,7 +14,16 @@ const tabs = [
 ]
 
 function AdminPage() {
-  const [activeTab,setActiveTab] = userStore("create")
+  const [activeTab,setActiveTab] = useState("create")
+
+  const {fetchAllProducts,products} = useProductStore()
+
+  useEffect(() => {
+    const func = async() => {
+        await fetchAllProducts()
+    }
+    func()
+  },[fetchAllProducts])
 
 
   return (
@@ -29,7 +39,7 @@ function AdminPage() {
 
         <div className='flex justify-center mb-8'>
             {tabs.map((tab) => (
-                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center px-4 py-2 rounded-md transition-colors duration-200 ${activeTab === tab.id ? "bg-emerald-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600" }`}>
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center ml-2 px-4 py-2 rounded-md transition-colors duration-200 ${activeTab === tab.id ? "bg-emerald-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600" }`}>
                     <tab.icon className='mr-2 h-5 w-5'/>
                     {tab.label}
                 </button>
