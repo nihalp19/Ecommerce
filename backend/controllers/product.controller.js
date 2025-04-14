@@ -123,7 +123,7 @@ export const getProductsByCategory = async(req,res) => {
         const {category} = req.params
 
         const products = await Product.find({category})
-        res.json(products)
+        res.status(200).json({products :products})
     } catch (error) {
     console.log("error while getcategory products controller",error.message) 
     res.status(500).json({message : "Internal Server Error",error : error.message})       

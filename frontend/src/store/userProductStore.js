@@ -40,6 +40,20 @@ export const useProductStore = create((set) => ({
         }
     },
 
+    fetchProductByCategory : async (category) => {
+        set({loading : true})
+        try {
+            const response = await axiosInstance.get(`/products/category/${category}`)
+
+            console.log("response",response)
+            set({products : response.data.products})
+        } catch (error) {
+            toast.error(error.response.data.error || "Failed to fetch products")
+        }finally{
+            set({loading : false})
+        }
+    },
+
     deleteProduct : async (productId) => {
         set({loading : true})
         try {

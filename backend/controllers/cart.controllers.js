@@ -1,33 +1,33 @@
 import Product from "../models/product.model.js"
 
-export const getCartProducts = async (req,res) => {
+export const getCartProducts = async (req, res) => {
 
     try {
-        const products = await Product.find({_id : {$in : req.user.cartItems}})
-        
+        const products = await Product.find({ _id: { $in: req.user.cartItems } })
+
 
         const cartItems = products.map(product => {
             const item = req.user.cartItems.find(cartItems => cartItems.id === product.id)
-            return {...product.toJSON(),quantity : item.quantity}
+            return { ...product.toJSON(), quantity: item.quantity }
         })
 
-        res.status(cartItems)
+        res.status(200).json({ cartItems: cartItems })
     } catch (error) {
-        console.log("Error in getCartProducts controller",error.message)
-        return res.status(500).json({message : "Internal Server Error",error : error.message})
+        console.log("Error in getCartProducts controller", error.message)
+        return res.status(500).json({ message: "Internal Server Error", error: error.message })
     }
 }
 
 
-export const addToCart = async(req,res) => {
+export const addToCart = async (req, res) => {
     try {
-        const {productId} = req.body
+        const { productId } = req.body
         const user = req.user
 
         const existingItem = user.cartItems.find(item => item.id === productId)
-        if(existingItem){
+        if (existingItem) {
             existingItem.quantity += 1
-        }else{
+        } else {
             user.cartItems.push(productId)
         }
 
@@ -36,49 +36,53 @@ export const addToCart = async(req,res) => {
         res.json(user.cartItems)
 
     } catch (error) {
-        console.log("Error in addToCart controller",error.message)
-        return res.status(500).json({message : "Server Error",error : error.message})
+        console.log("Error in addToCart controller", error.message)
+        return res.status(500).json({ message: "Server Error", error: error.message })
     }
 }
 
-export const removeAllFromCart = async (req,res) => {
+export const removeAllFromCart = async (req, res) => {
     try {
-        const {productId} = req.body
-        const user = req.user 
+        const { productId } = req.body
+        const user = req.user
 
-        if(!productId){
+        if (!productId) {
             user.cartItems = []
-        }else{
+        } else {
             user.cartItems = user.cartItems.filter((item) => item.id !== productId)
         }
 
         await user.save()
         res.json(user.cartItems)
     } catch (error) {
-        res.status(500).json({message : "Server Error",error : error.message})
+        res.status(500).json({ message: "Server Error", error: error.message })
     }
 }
 
-export const updateQuantity = async (req,res) => {
+export const updateQuantity = async (req, res) => {
     try {
-        const {id : productId} = req.params;
-        const {quantity} = req.body
+        const { id: productId } = req.params;
+        const { quantity } = req.body
         const user = req.user
 
         const existingItem = user.cartItems.find((item) => item.id === productId)
 
-        if(existingItem){
-            if(quantity === 0){
+        if (existingItem) {
+            if (quantity === 0) {
                 user.cartItems = user.cartItems.filter((item) => item.id !== productId)
                 await user.save()
                 return res.json(user.cartItems)
             }
-        }else{
-            res.status(404).json({message : "Product not found"})
+
+            existingItem.quantity = quantity;
+            await user.save();
+            res.status(200).json({cartItems : user.cartItems});
+        } else {
+            res.status(404).json({ message: "Product not found" })
         }
 
     } catch (error) {
-        console.log("Error is updateQuantity controller",error.message)
-        return res.status(500).json({message : "Internal Server Error",error : error.message})
+        console.log("Error is updateQuantity controller", error.message)
+        return res.status(500).json({ message: "Internal Server Error", error: error.message })
     }
 }
