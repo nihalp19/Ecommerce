@@ -25,7 +25,8 @@ export const createCheckoutSession = async (req, res) => {
                         images: [product.image],
                     },
                     unit_amount: amount
-                }
+                },
+                quantity: product.quantity || 1,
             }
         })
 
@@ -38,11 +39,13 @@ export const createCheckoutSession = async (req, res) => {
             }
         }
 
+        console.log("🛒 Products being added to Stripe metadata:", products);
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             line_items: lineItems,
             mode: "payment",
-            success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+            success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.CLIENT_URL}/purchase-cancel`,
             discounts: coupon ? [
                 {
@@ -51,14 +54,21 @@ export const createCheckoutSession = async (req, res) => {
             ] : [],
             metadata: {
                 userId: req.user._id.toString(),
-                couponCode: couponCode || ""
+                couponCode: couponCode || "",
+                products: JSON.stringify(
+					products.map((p) => ({
+						id: p._id,
+						quantity: p.quantity,
+						price: p.price,
+					}))
+				),
             }
         })
 
         if (totalAmount >= 20000) {
             await createNewCoupon(req.user._id)
         }
-        re.status(200).json({ id: session.id, totalAmount: totalAmount / 100 })
+        res.status(200).json({ id: session.id, totalAmount: totalAmount / 100 })
 
     } catch (error) {
         console.log("Error while creatsession controller", error.message)
@@ -67,45 +77,50 @@ export const createCheckoutSession = async (req, res) => {
 }
 
 
-export const checkoutSuccess = async (req,res) => {
+export const checkoutSuccess = async (req, res) => {
     try {
-        const {sessionId} = req.body
+        const { sessionId } = req.body
         const session = await stripe.checkout.sessions.retrieve(sessionId)
 
-        if(session.payment_status === "paid"){
 
-            if(session.metadata.couponCode){
+        if (session.payment_status === "paid") {
+
+            if (session.metadata.couponCode) {
                 await Coupon.findOneAndUpdate({
-                    code : session.metadata.coupon,
-                    userId : session.metadata.userId
-                },{
-                    isActive : false
+                    code: session.metadata.coupon,
+                    userId: session.metadata.userId
+                }, {
+                    isActive: false
                 })
             }
         }
 
         const products = JSON.parse(session.metadata.products)
 
+        if(!products){
+            return res.status(400).json({message : "products is not passed in metadata"})
+        }
+
         const newOrder = new Order({
-            user : session.metadata.userId,
-            products : products.map(product => ({
-                products : product.is,
-                quantity : product.quantity,
-                price : product.price,
+            user: session.metadata.userId,
+            product: products.map(product => ({
+                products: product.id,
+                quantity: product.quantity,
+                price: product.price,
             })),
-            totalAmount : session.amount_total / 100,
-            stripeSessionId :  sessionId
+            totalAmount: session.amount_total / 100,
+            stripeSessionId: sessionId
         })
 
         await newOrder.save()
         res.status(200).json({
-            success : true,
-            message : "Payment successful , order created and coupon deactivated if used"
+            success: true,
+            message: "Payment successful , order created and coupon deactivated if used"
         })
 
     } catch (error) {
-        console.log("error in processing checkout",error)
-        res.status(500).json({message : "Error processing successful checkout",error : error.message})
+        console.log("error in processing checkout", error)
+        res.status(500).json({ message: "Error processing successful checkout", error: error.message })
     }
 }
 

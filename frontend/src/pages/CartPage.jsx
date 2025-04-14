@@ -5,6 +5,8 @@ import { ShoppingCart } from "lucide-react";
 import { Link } from 'react-router-dom';
 import CartItem from '../components/CartItem';
 import OrderSummary from '../components/OrderSummary';
+import PeopleAlsoBought from '../components/PeopleAlsoBought';
+import GiftCouponCard from '../components/GIftCouponCard';
 function CartPage() {
   const { cart } = useCartStore()
 
@@ -28,7 +30,7 @@ function CartPage() {
                 ))}
               </div>
             )}
-            {/* {cart.length > 0 && <PeopleAlsoBought />} */}
+            {cart.length > 0 && <PeopleAlsoBought />}
           </motion.div>
           {cart.length > 0 && (
             <motion.div
