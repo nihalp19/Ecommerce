@@ -23,6 +23,10 @@ export const useCartStore = create((set,get) => ({
         }
     },
 
+    clearCart : () => {
+        set({cart : [],coupon : null,total : 0,subtotal : 0})
+    },
+
     addToCart : async (product) => {
         try {
             await axiosInstance.post("/cart",{productId : product._id,})

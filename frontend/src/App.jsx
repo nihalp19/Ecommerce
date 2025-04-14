@@ -13,7 +13,7 @@ import { useCartStore } from "./store/useCartStore"
 import CartPage from "./pages/CartPage"
 import { useLocation } from "react-router-dom"
 import PurchaseSuccessPage from "./pages/PurchaseSuccessPage"
-// import Footer from "./components/Footer"
+import PurchaseCancelPage from "./pages/PurchaseCancelPage"
 
 
 function App() {
@@ -60,6 +60,7 @@ function App() {
           <Route path="/cart" element={ user ? <CartPage /> : <Navigate to="/login"/>}/>
           <Route />
           <Route path="/purchase-success" element={ user ? <PurchaseSuccessPage/> : <Navigate to="/login"/>}/>
+          <Route path="/purchase-cancel" element={ user ? <PurchaseCancelPage/> : <Navigate to="/login"/>}/>
           <Route />
         </Routes>
         {/* <Footer /> */}
